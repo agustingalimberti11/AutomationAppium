@@ -13,6 +13,7 @@ import java.time.Duration;
 public class BaseTest {
     protected AndroidDriver driver;
     protected WebDriverWait wait;
+
     @BeforeEach
     void AbrirApp() throws Exception {
          driver = new AndroidDriver(
@@ -43,5 +44,21 @@ public class BaseTest {
 
     protected void tap(By locator){
         esperarClickeable(locator).click();
+    }
+
+    protected void escribir(By locator, String texto){
+        WebElement campo = esperarVisible(locator);
+        campo.clear();
+        campo.sendKeys(texto);
+        try{
+            driver.hideKeyboard();
+        }catch (Exception ignored){}
+    }
+
+    protected WebElement scrollAbajoHasta(String texto){
+        return driver.findElement(AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true))"
+                        + ".scrollIntoView(new UiSelector().text(\"" + texto + "\"))"
+        ));
     }
 }
