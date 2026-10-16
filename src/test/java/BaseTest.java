@@ -21,9 +21,9 @@ public class BaseTest {
                 LeerCapability.opciones());
          wait = new WebDriverWait(driver, Duration.ofSeconds(20));
         try{
-            new WebDriverWait(driver, Duration.ofSeconds(8)).until(
-                    ExpectedConditions.elementToBeClickable(AppiumBy.id("android:id/button1"))
-            ).click();
+            new WebDriverWait(driver, Duration.ofSeconds(8))
+                    .until(ExpectedConditions.elementToBeClickable(AppiumBy.id("android:id/button1")))
+                    .click();
         }catch (Exception ignore){}
     }
 
