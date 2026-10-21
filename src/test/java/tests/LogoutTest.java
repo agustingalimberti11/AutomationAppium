@@ -2,18 +2,12 @@ package tests;
 
 import Base.BaseTest;
 import io.appium.java_client.AppiumBy;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("Android")
