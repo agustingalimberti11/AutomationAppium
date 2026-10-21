@@ -1,10 +1,13 @@
+package Base;
+
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import util.LeerCapability;
 import java.net.URI;
@@ -61,4 +64,13 @@ public class BaseTest {
                         + ".scrollIntoView(new UiSelector().text(\"" + texto + "\"))"
         ));
     }
+
+    protected Wait<WebDriver> esperaFluida(){
+        return new FluentWait<WebDriver>(driver)
+                .withTimeout(Duration.ofSeconds(15)) //tiempo limite de 15 segundos
+                .pollingEvery(Duration.ofMillis(500)) //pregunta
+                .ignoring(NoSuchElementException.class)  //ignoramos una excepcion por si no aparece el elemento
+                .ignoring(StaleElementReferenceException.class); //la pantalla se redibujo
+    }
+
 }

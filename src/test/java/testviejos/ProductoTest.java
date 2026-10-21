@@ -1,10 +1,14 @@
+package testviejos;
+
+import Base.BaseTest;
 import io.appium.java_client.AppiumBy;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ProductoTest extends BaseTest{
+public class ProductoTest extends BaseTest {
 
     private static final By TITULO = AppiumBy.id("com.saucelabs.mydemoapp.android:id/productTV");
     private static final By MENU = AppiumBy.accessibilityId("View menu");
@@ -40,13 +44,13 @@ public class ProductoTest extends BaseTest{
         escribir(USUARIO, "bod@example.com");
         escribir(PASSWORD, "10203040");
         tap(BOTON_LOGIN);
-        assertTrue(esperarVisible(TITULO).getText().contains("Products"));
+        Assertions.assertTrue(esperarVisible(TITULO).getText().contains("Products"));
         tap(PRIMER_PRODUCTO);
-        assertTrue(esperarVisible(TITULO).getText().contains("Backpack"));
-        assertTrue(esperarVisible(PRECIO).getText().contains("29.99"));
+        Assertions.assertTrue(esperarVisible(TITULO).getText().contains("Backpack"));
+        Assertions.assertTrue(esperarVisible(PRECIO).getText().contains("29.99"));
         tap(BOTON_AGREGAR);
         tap(ICONO_CARRITO);
-        assertTrue(esperarVisible(TITULO).getText().contains("My Cart"));
+        Assertions.assertTrue(esperarVisible(TITULO).getText().contains("My Cart"));
         tap(IR_A_CHECKOUT);
         escribir(NOMBRE_ENVIO,"agustin");
         escribir(DIRECCION,"calle 123");
@@ -60,7 +64,7 @@ public class ProductoTest extends BaseTest{
         escribir(CVV,"123");
         tap(REVISAR_ORDEN);
         tap(CONFIRMAR_ORDEN);
-        assertTrue(esperarVisible(CHECKOUT_OK).getText().contains("Checkout Complete"));
+        Assertions.assertTrue(esperarVisible(CHECKOUT_OK).getText().contains("Checkout Complete"));
     }
 
 }

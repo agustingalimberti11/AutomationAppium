@@ -1,10 +1,13 @@
+package testviejos;
+
+import Base.BaseTest;
 import io.appium.java_client.AppiumBy;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CatalogoTest extends BaseTest{
+public class CatalogoTest extends BaseTest {
 
     @Test
     void catalogoMuestraTituloProducts() throws Exception {

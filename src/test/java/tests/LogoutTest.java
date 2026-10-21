@@ -1,5 +1,13 @@
+package tests;
+
+import Base.BaseTest;
 import io.appium.java_client.AppiumBy;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -8,7 +16,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DialogoLogoutTest extends BaseTest {
+@Tag("Android")
+@EnabledOnOs(OS.WINDOWS)
+@DisplayName("tests.LogoutTest")
+public class LogoutTest extends BaseTest {
 
     private static final By TITULO = AppiumBy.id("com.saucelabs.mydemoapp.android:id/productTV");
     private static final By MENU = AppiumBy.accessibilityId("View menu");
@@ -21,26 +32,34 @@ public class DialogoLogoutTest extends BaseTest {
     private static final By CONFIRM_BOTON_LOGOUT = AppiumBy.id("android:id/button1");
 
     @Test
-    void confirmarLogOut(){
+    @DisplayName("Confirmar logout")
+    void confirmarLogOut() {
+        //Arrange
+        iniciarSesion("bod@example.com", "10203040");
+        //Act
+        abrirDialogoLogout();
+        confirmar();
+        //assert
+        assertTrue(esperarVisible(USUARIO).isDisplayed());
+    }
+
+    private void iniciarSesion(String usuario, String password){
         esperarVisible(TITULO);
         tap(MENU);
         tap(LOGIN_MENU);
-        escribir(USUARIO,"bod@example.com");
-        escribir(PASSWORD , "10203040");
+        escribir(USUARIO,usuario);
+        escribir(PASSWORD , password);
         tap(BOTON_LOGIN);
         assertTrue(esperarVisible(TITULO).getText().contains("Products"));
+    }
 
+    private void abrirDialogoLogout(){
         tap(MENU);
         tap(BOTON_LOGOUT);
-        wait.until(this::dialogoVisible);
         assertTrue(esperarVisible(TEXTO_DIALOG).getText().contains("logout"));
+    }
+
+    private void confirmar(){
         tap(CONFIRM_BOTON_LOGOUT);
-
     }
-
-    private boolean dialogoVisible(WebDriver d){
-            List<WebElement> textos = d.findElements(TEXTO_DIALOG);
-            return !textos.isEmpty() && textos.get(0).isDisplayed();
-        };
-    }
-
+}

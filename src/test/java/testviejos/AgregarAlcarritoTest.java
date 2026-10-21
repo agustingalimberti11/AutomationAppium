@@ -1,8 +1,11 @@
+package testviejos;
+
 import io.appium.java_client.AppiumBy;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import Base.BaseTest;
 
 public class AgregarAlcarritoTest extends BaseTest {
 
@@ -17,11 +20,11 @@ public class AgregarAlcarritoTest extends BaseTest {
     void agregaProductoAlCarrito(){
         esperarVisible(CATALOGO);
         tap(PRIMER_PRODUCTO);
-        assertTrue(esperarVisible(CATALOGO).getText().contains("Backpack"));
+        Assertions.assertTrue(esperarVisible(CATALOGO).getText().contains("Backpack"));
 
         tap(BOTON_AGREGAR);
         tap(ICONO_CARRITO);
-        assertTrue(esperarVisible(TITLE_PRODUCTO_CARRITO).getText().contains("Backpack"));
+        Assertions.assertTrue(esperarVisible(TITLE_PRODUCTO_CARRITO).getText().contains("Backpack"));
 
     }
 }
