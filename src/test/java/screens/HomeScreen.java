@@ -1,22 +1,29 @@
 package screens;
 
-import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import org.openqa.selenium.By;
+import io.appium.java_client.pagefactory.AndroidFindBy;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class HomeScreen extends BaseScreen{
 
-    private static final By TITULO = AppiumBy.id("com.saucelabs.mydemoapp.android:id/productTV");
-    private static final By MENU = AppiumBy.accessibilityId("View menu");
-    private static final By LOGIN_MENU = AppiumBy.accessibilityId("Login Menu Item");
-    private static final By PERFIL_MENU = AppiumBy.androidUIAutomator(
-            "new UiSelector().text(\"About\")"
-    );
-    private static final By PRIMER_PRODUCTO = AppiumBy.androidUIAutomator(
-            "new UiSelector().description(\"Product Image\").instance(0)"
-    );
-    private static final By ICONO_CARRITO = AppiumBy.accessibilityId("View cart");
+    @AndroidFindBy(id="com.saucelabs.mydemoapp.android:id/productTV")
+    private WebElement TITULO;
+
+    @AndroidFindBy(accessibility = "View menu")
+    private WebElement MENU;
+
+    @AndroidFindBy(accessibility = "Login Menu Item")
+    private WebElement LOGIN_MENU;
+
+    @AndroidFindBy(accessibility = "View cart")
+    private WebElement ICONO_CARRITO;
+
+    @AndroidFindBy(uiAutomator = "\"new UiSelector().text(\\\"About\\\")")
+    private WebElement PERFIL_MENU;
+
+    @AndroidFindBy(uiAutomator = "new UiSelector().description(\"Product Image\").instance(0)")
+    private WebElement PRIMER_PRODUCTO;
 
     public HomeScreen(AndroidDriver driver, WebDriverWait wait) {
         super(driver, wait);
