@@ -19,6 +19,9 @@ public class LoginScreen extends BaseScreen{
     @AndroidFindBy(id = "com.saucelabs.mydemoapp.android:id/loginTV")
     private WebElement TITULO;
 
+    @AndroidFindBy(id = "com.saucelabs.mydemoapp.android:id/nameET")
+    private WebElement usuario;
+
     public LoginScreen(AndroidDriver driver, WebDriverWait wait) {
         super(driver, wait);
     }
@@ -48,5 +51,9 @@ public class LoginScreen extends BaseScreen{
 
     public boolean muestraTitulo(String texto) {
         return esperarVisible(TITULO).getText().contains(texto);
+    }
+
+    public boolean muestraCampoUsuario() {
+        return esperarVisible(usuario).isDisplayed();
     }
 }

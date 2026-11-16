@@ -5,6 +5,8 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
@@ -20,6 +22,7 @@ public abstract class BaseScreen {
 
     private static final int MAX_SCROLLS = 8;
     private static final int MAX_INTERRUPCIONES = 5;
+    private static final By MENSAJE_DIALOGO = AppiumBy.id("android:id/message");
     private static final By CONFIRMAR = AppiumBy.id("android:id/button1");
     private static final By CANCELAR = AppiumBy.id("android:id/button2");
     private static final By PERMITIR = By.xpath(
@@ -28,8 +31,6 @@ public abstract class BaseScreen {
                     + " or @resource-id='com.google.android.permissioncontroller:id/permission_allow_foreground_only_button'"
                     + " or @resource-id='com.google.android.permissioncontroller:id/permission_allow_button'"
                     + " or @resource-id='com.android.packageinstaller:id/permission_allow_button']");
-    private static final By MENSAJE_DIALOGO = AppiumBy.id("android:id/message");
-
 
     protected final AndroidDriver driver;
     protected final WebDriverWait wait;
@@ -37,15 +38,16 @@ public abstract class BaseScreen {
     protected BaseScreen(AndroidDriver driver, WebDriverWait wait) {
         this.driver = driver;
         this.wait = wait;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(20)), this);
+        // PageFactory localiza; las esperas explicitas controlan el tiempo.
+        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ZERO), this);
     }
 
-    protected WebElement esperarVisible(WebElement locator) {
-        return wait.until(ExpectedConditions.visibilityOf(locator));
-    }
-
-    protected WebElement esperarClickeable(WebElement locator) {
-        return wait.until(ExpectedConditions.elementToBeClickable(locator));
+    public static WebDriverWait crearEspera(AndroidDriver driver) {
+        WebDriverWait espera = new WebDriverWait(driver, Duration.ofSeconds(20));
+        espera.pollingEvery(Duration.ofMillis(500));
+        espera.ignoring(StaleElementReferenceException.class)
+                .ignoring(ElementNotInteractableException.class);
+        return espera;
     }
 
     // Todas las esperas atienden primero los permisos y avisos conocidos.
@@ -63,6 +65,47 @@ public abstract class BaseScreen {
             }
             return condicion.apply(d);
         });
+    }
+
+    protected WebElement esperarVisible(WebElement elemento) {
+        return esperar(ExpectedConditions.visibilityOf(elemento), "esperar un elemento visible");
+    }
+
+    protected void esperarTexto(WebElement elemento, String texto) {
+        esperar(d -> texto.equals(elemento.getText()), "esperar texto: " + texto);
+    }
+
+    protected void tap(WebElement elemento) {
+        tocar(ExpectedConditions.elementToBeClickable(elemento));
+    }
+
+    private void tocar(ExpectedCondition<WebElement> buscar) {
+        esperar(d -> {
+            WebElement elemento = buscar.apply(d);
+            if (elemento == null) {
+                return false;
+            }
+            elemento.click();
+            return true;
+        }, "tocar un elemento");
+    }
+
+    protected void escribir(WebElement campo, String texto) {
+        esperar(d -> {
+            if (ExpectedConditions.elementToBeClickable(campo).apply(d) == null) {
+                return false;
+            }
+            campo.clear();
+            campo.sendKeys(texto);
+            return true;
+        }, "escribir en un campo");
+        ocultarTeclado();
+    }
+
+    private void ocultarTeclado() {
+        if (driver.isKeyboardShown()) {
+            driver.hideKeyboard();
+        }
     }
 
     private WebElement buscarInterrupcion() {
@@ -86,37 +129,35 @@ public abstract class BaseScreen {
         return null; // Los dialogos de la app se responden explicitamente.
     }
 
-    private WebElement buscarVisible(By localizador) {
-        for (WebElement elemento : driver.findElements(localizador)) {
-            if (elemento.isDisplayed()) {
-                return elemento;
+    public String textoDialogo() {
+        return esperar(ExpectedConditions.visibilityOfElementLocated(MENSAJE_DIALOGO),
+                "leer el dialogo").getText();
+    }
+
+    public void confirmarDialogo(String textoEsperado) {
+        responderDialogo(textoEsperado, CONFIRMAR);
+    }
+
+    public void cancelarDialogo(String textoEsperado) {
+        responderDialogo(textoEsperado, CANCELAR);
+    }
+
+    private void responderDialogo(String textoEsperado, By boton) {
+        if (textoEsperado == null || textoEsperado.isBlank()) {
+            throw new IllegalArgumentException("Indicar el texto del dialogo esperado");
+        }
+        String texto = textoEsperado.toLowerCase(Locale.ROOT);
+        WebElement mensaje = esperar(d -> {
+            WebElement actual = buscarVisible(MENSAJE_DIALOGO);
+            WebElement accion = ExpectedConditions.elementToBeClickable(boton).apply(d);
+            if (actual == null || !actual.getText().toLowerCase(Locale.ROOT).contains(texto)
+                    || accion == null) {
+                return null;
             }
-        }
-        return null;
-    }
-
-    protected void esperarTexto(WebElement elemento, String texto){
-        esperar( d -> texto.equals(elemento.getText()), "esperar texto: " + texto);
-    }
-
-    protected void tap(WebElement locator) {
-        esperarClickeable(locator).click();
-    }
-
-    protected void escribir(WebElement locator, String texto) {
-        WebElement campo = esperarVisible(locator);
-        campo.clear();
-        campo.sendKeys(texto);
-        try {
-            driver.hideKeyboard();
-        } catch (Exception ignored) {
-        }
-    }
-
-    protected void ocultarTeclado(){
-        if(driver.isKeyboardShown()){
-            driver.hideKeyboard();
-        }
+            accion.click();
+            return actual;
+        }, "responder dialogo: " + textoEsperado);
+        esperar(ExpectedConditions.invisibilityOf(mensaje), "esperar el cierre del dialogo");
     }
 
     // Busca antes de cada gesto y tambien despues de llegar al final.
@@ -139,9 +180,10 @@ public abstract class BaseScreen {
         }, "buscar mediante scroll: " + localizador);
     }
 
-    public void scrollYTap(By localizador){
+    public void scrollYTap(By localizador) {
         scrollHasta(localizador);
-        tap((WebElement) localizador);
+        // Volver a localizar despues del scroll evita referencias obsoletas.
+        tocar(ExpectedConditions.elementToBeClickable(localizador));
     }
 
     private boolean scrollAbajo() {
@@ -154,5 +196,14 @@ public abstract class BaseScreen {
                 "direction", "down",
                 "percent", 0.75
         )));
+    }
+
+    private WebElement buscarVisible(By localizador) {
+        for (WebElement elemento : driver.findElements(localizador)) {
+            if (elemento.isDisplayed()) {
+                return elemento;
+            }
+        }
+        return null;
     }
 }
