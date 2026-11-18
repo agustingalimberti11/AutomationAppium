@@ -17,7 +17,7 @@ public class ContextoEscenario {
     private PerfilScreen perfil;
 
     public void abrir() throws IOException {
-        LeerCapability configuracion = new LeerCapability();
+        ConfiguracionAppium configuracion = new ConfiguracionAppium();
         driver = new AndroidDriver(configuracion.servidor(), configuracion.opciones());
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
         WebDriverWait espera = BaseScreen.crearEspera(driver);
